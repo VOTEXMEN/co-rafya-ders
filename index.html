@@ -2,270 +2,459 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>10. Sınıf Doğal ve Beşeri Unsurlar Yarışması</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>10. Sınıf Coğrafya - Doğal ve Beşeri Unsurlar</title>
     <style>
-        :root {
-            --primary: #2c3e50;
-            --secondary: #27ae60;
-            --accent: #e67e22;
-            --danger: #e74c3c;
-            --light: #ecf0f1;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 20px;
-            color: #333;
+            background-color: #ffffff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            user-select: none;
         }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+        /* YÜZEN İSİMLER ALANI */
+        #floating-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10;
         }
-        h1, h2 {
-            text-align: center;
-            color: var(--primary);
-        }
-        .student-management {
-            margin-bottom: 30px;
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-        .add-box {
+
+        .student-tag {
+            position: absolute;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            background: #ffffff;
+            border: 2px solid #333;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            cursor: grab;
+            transition: transform 0.1s ease;
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
         }
-        input[type="text"] {
-            flex: 1;
-            padding: 10px;
+
+        /* ÖZEL İSİM STİLLERİ */
+        /* EMİR (Sen) - Ekstra Parlayan Neon Mor */
+        .tag-emir {
+            border-color: #9b59b6 !important;
+            color: #8e44ad !important;
+            box-shadow: 0 0 15px #9b59b6, 0 0 30px #8e44ad !important;
+            animation: pulse-purple 1.5s infinite alternate;
+        }
+        @keyframes pulse-purple {
+            0% { box-shadow: 0 0 10px #9b59b6; }
+            100% { box-shadow: 0 0 25px #8e44ad, 0 0 40px #d35400; }
+        }
+
+        /* BERAT (Tırcı / Geliştirici) */
+        .tag-berat {
+            border-color: #e67e22 !important;
+            background: #fff8f0 !important;
+            color: #d35400 !important;
+        }
+
+        /* KUTLUHAN (Kutu Ma Kutu) - Parlak Altın */
+        .tag-kutluhan {
+            border-color: #f1c40f !important;
+            color: #b7950b !important;
+            box-shadow: 0 0 15px #f1c40f !important;
+        }
+
+        /* YAĞMUR - Sönük Altın */
+        .tag-yagmur {
+            border-color: #d4ac0d !important;
+            color: #7d6608 !important;
+            opacity: 0.85;
+        }
+
+        .btn-del {
+            color: #e74c3c;
+            font-weight: bold;
+            margin-left: 6px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+
+        /* MERKEZİ BAŞLATMA BUTONU VE KONTROLLER */
+        .center-controls {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            text-align: center;
+        }
+
+        .btn-start {
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: bold;
+            background: #111;
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
+
+        .btn-start:hover { transform: scale(1.05); }
+
+        .add-box {
+            margin-top: 15px;
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .add-box input {
+            padding: 8px;
             border: 1px solid #ccc;
             border-radius: 6px;
-            font-size: 16px;
+            outline: none;
         }
-        button {
-            padding: 10px 20px;
+
+        .add-box button {
+            padding: 8px 12px;
+            background: #27ae60;
+            color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
         }
-        .btn-add { background: var(--secondary); color: white; }
-        .btn-start { background: var(--accent); color: white; width: 100%; font-size: 18px; padding: 15px; margin-top: 10px; }
-        .btn-delete { background: var(--danger); color: white; padding: 5px 10px; font-size: 12px; }
-        button:hover { opacity: 0.9; }
-        
-        .student-list {
+
+        /* PATLAMA EFEKTİ (STARBURST FLASH) */
+        #explosion-flash {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 50px; height: 50px;
+            background: radial-gradient(circle, #ffffff 10%, #f1c40f 40%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        @keyframes explode {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(25); opacity: 0.9; }
+            100% { transform: translate(-50%, -50%) scale(40); opacity: 0; }
+        }
+
+        /* KÖŞELERDEKİ GRUP KUTULARI */
+        .teams-grid {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-            max-height: 250px;
-            overflow-y: auto;
-            padding: 5px;
-        }
-        .student-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid #eee;
-        }
-        
-        .teams-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .team-card {
-            background: #eef2f3;
-            border-top: 5px solid var(--primary);
-            padding: 15px;
-            border-radius: 8px;
-        }
-        .team-card h3 { margin-top: 0; color: var(--primary); }
-        .team-card ul { padding-left: 20px; margin-bottom: 0; }
-        
-        .game-area {
-            display: none;
-            margin-top: 30px;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
             padding: 20px;
-            background: #e8f8f5;
-            border-radius: 8px;
-            text-align: center;
+            gap: 20px;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            pointer-events: none;
+            z-index: 5;
         }
+
+        .team-box {
+            border: 2px solid #2c3e50;
+            border-radius: 12px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .team-box h3 {
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 5px;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .team-box ul { list-style: none; font-size: 13px; line-height: 1.6; }
+
+        /* GELİŞTİRİCİ GRUBU (Özel Altın Çerçeve) */
+        .team-dev {
+            border-color: #f1c40f !important;
+            background: #fffdf0 !important;
+            box-shadow: 0 0 20px rgba(241, 196, 15, 0.3) !important;
+        }
+        .team-dev h3 { border-color: #f1c40f !important; color: #b7950b; }
+
+        /* ORTADAKİ OYUN ALANI */
+        #game-area {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 320px;
+            background: white;
+            border: 2px solid #111;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 30;
+        }
+
         .word-box {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: bold;
             margin: 20px 0;
-            color: var(--primary);
+            color: #2c3e50;
         }
-        .choice-btns { display: flex; justify-content: center; gap: 20px; }
-        .btn-natural { background: #27ae60; color: white; font-size: 16px; }
-        .btn-human { background: #d35400; color: white; font-size: 16px; }
-        .score { font-size: 18px; font-weight: bold; margin-top: 15px; }
+
+        .choice-btns button {
+            padding: 10px 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        .btn-nat { background: #27ae60; color: white; }
+        .btn-hum { background: #e67e22; color: white; }
+
+        /* HAREKET VE DÖNME ANİMASYONLARI */
+        .sucking {
+            transition: all 1.2s cubic-bezier(0.55, 0.055, 0.675, 0.19) !important;
+            transform: translate(-50%, -50%) rotate(1080deg) scale(0.1) !important;
+            top: 50% !important; left: 50% !important;
+            opacity: 0.5;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🌍 10. Sınıf Coğrafya Yarışması</h1>
-    <h2>Doğal ve Beşeri Unsurlar</h2>
+    <!-- YÜZEN VE SÜRÜKLENEN İSİMLER -->
+    <div id="floating-container"></div>
 
-    <!-- Öğrenci Listesi Yönetimi -->
-    <div class="student-management">
-        <h3>Sınıf Listesi Yönetimi</h3>
+    <!-- MERKEZİ KONTROLLER -->
+    <div class="center-controls" id="centerControls">
+        <button class="btn-start" onclick="startTournament()">OYUNU BAŞLAT 🚀</button>
         <div class="add-box">
-            <input type="text" id="studentInput" placeholder="Öğrenci Adı Soyadı...">
-            <button class="btn-add" onclick="addStudent()">Ekle</button>
+            <input type="text" id="newNameInput" placeholder="Öğrenci Adı...">
+            <button onclick="addStudent()">Ekle</button>
         </div>
-        <div class="student-list" id="studentList"></div>
-        <button class="btn-start" onclick="startGame()">OYUNU BAŞLAT VE TAKIMLARI KUR 🚀</button>
     </div>
 
-    <!-- Takımlar -->
-    <div class="teams-container" id="teamsContainer"></div>
+    <!-- PATLAMA EFEKTİ LAYER'I -->
+    <div id="explosion-flash"></div>
 
-    <!-- Oyun Alanı -->
-    <div class="game-area" id="gameArea">
-        <h2>Sıra Sizde! Unsuru Tahmin Edin</h2>
+    <!-- 4 KÖŞE GRUPLAR -->
+    <div class="teams-grid" id="teamsGrid">
+        <div class="team-box team-dev">
+            <h3>👑 1. Takım (Geliştirici Grubu)</h3>
+            <ul id="team-0"></ul>
+        </div>
+        <div class="team-box">
+            <h3>🌿 2. Takım (Litosfer)</h3>
+            <ul id="team-1"></ul>
+        </div>
+        <div class="team-box">
+            <h3>💧 3. Takım (Hidrosfer)</h3>
+            <ul id="team-2"></ul>
+        </div>
+        <div class="team-box">
+            <h3>🌤️ 4. Takım (Atmosfer)</h3>
+            <ul id="team-3"></ul>
+        </div>
+    </div>
+
+    <!-- ORTA OYUN ALANI -->
+    <div id="game-area">
+        <p style="font-size:12px; color:#777; font-weight:bold;">10. SINIF COĞRAFYA YARIŞMASI</p>
         <div class="word-box" id="currentWord">---</div>
         <div class="choice-btns">
-            <button class="btn-natural" onclick="checkAnswer('doğal')">DOĞAL UNSUR</button>
-            <button class="btn-human" onclick="checkAnswer('beşeri')">BEŞERİ UNSUR</button>
+            <button class="btn-nat" onclick="answer('doğal')">DOĞAL</button>
+            <button class="btn-hum" onclick="answer('beşeri')">BEŞERİ</button>
         </div>
-        <div class="score" id="scoreBoard">Puan: 0</div>
+        <p id="scoreBoard" style="margin-top:15px; font-weight:bold; font-size:14px;">Puan: 0</p>
     </div>
-</div>
 
 <script>
-    // Başlangıç Listesi
+    // ÖĞRENCİ LİSTESİ DÜZENLEMESİ
     let students = [
-        "BİLAL BERAT GÖRGİN", "BÜŞRA EGER", "DENİZ ÖZTEKİN", "EBUBEKİR KİPİCİ",
-        "ECE DOĞAN", "ECRİN ÖZDEMİR", "EMİR ÖZTEN", "EMİRHAN AKÇİÇEK",
-        "EYLÜL SARI", "HALİL İBRAHİM OK", "KIVANÇ ÖZER", "KORAY CAN",
-        "KUTLUHAN KUŞCU", "MEHMET BARAN ÇEVİK", "MENESA ACUN", "MUSTAFA AŞIK",
-        "MUSTAFA BAŞOL", "NEHİR MAK", "NURSULTAN S. EMILBEKOV", "OSMAN HAKAN KUŞ",
-        "OYA YAĞMUR KARACA", "ÖZGÜR GÜNDÜZ", "ÖZLEM SU DEPREM", "SAMET BİLGEN",
-        "YAĞMUR KURUMEYDAN", "YAĞMUR UÇAR"
+        { name: "EMİR ÖZTEN", type: "emir" },
+        { name: "TIRCI [Geliştirici]", type: "berat" },
+        { name: "Kutuma Kutu", type: "kutluhan" },
+        { name: "YAĞMUR KURUMEYDAN", type: "yagmur" },
+        { name: "BÜŞRA EGER" }, { name: "DENİZ ÖZTEKİN" }, { name: "EBUBEKİR KİPİCİ" },
+        { name: "ECE DOĞAN" }, { name: "ECRİN ÖZDEMİR" }, { name: "EMİRHAN AKÇİÇEK" },
+        { name: "EYLÜL SARI" }, { name: "HALİL İBRAHİM OK" }, { name: "KIVANÇ ÖZER" },
+        { name: "KORAY CAN" }, { name: "MEHMET BARAN ÇEVİK" }, { name: "MENESA ACUN" },
+        { name: "MUSTAFA AŞIK" }, { name: "MUSTAFA BAŞOL" }, { name: "NEHİR MAK" },
+        { name: "NURSULTAN S. EMILBEKOV" }, { name: "OSMAN HAKAN KUŞ" },
+        { name: "OYA YAĞMUR KARACA" }, { name: "ÖZGÜR GÜNDÜZ" }, { name: "ÖZLEM SU DEPREM" },
+        { name: "SAMET BİLGEN" }, { name: "YAĞMUR UÇAR" }
     ];
 
     const words = [
         { word: "Orman", type: "doğal" },
-        { word: "Ev / Bina", type: "beşeri" },
+        { word: "Bina / Ev", type: "beşeri" },
         { word: "Deprem", type: "doğal" },
         { word: "Sanayi Tesisi", type: "beşeri" },
-        { word: "Akarsu / Su", type: "doğal" },
-        { word: "Köprü / Baraj", type: "beşeri" },
-        { word: "Dağ", type: "doğal" },
-        { word: "Otoyol", type: "beşeri" }
+        { word: "Su / Akarsu", type: "doğal" },
+        { word: "Köprü / Baraj", type: "beşeri" }
     ];
 
-    let currentWordIndex = 0;
-    let score = 0;
+    let itemsData = [];
+    let animId;
+    let isDragging = false;
+    let audioCtx = null;
 
-    // Listeyi Ekrana Bas
-    function renderList() {
-        const listEl = document.getElementById("studentList");
-        listEl.innerHTML = "";
-        students.forEach((name, index) => {
-            listEl.innerHTML += `
-                <div class="student-item">
-                    <span>${name}</span>
-                    <button class="btn-delete" onclick="removeStudent(${index})">Sil</button>
-                </div>
-            `;
+    // Sürükleme başladığında Kutu Ma Kutu ritmi çıkaran ses üreteci
+    function playKutuSound() {
+        try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        } catch(e){}
+    }
+
+    const container = document.getElementById('floating-container');
+
+    function initFloating() {
+        container.innerHTML = '';
+        itemsData = [];
+        const w = window.innerWidth - 150;
+        const h = window.innerHeight - 50;
+
+        students.forEach((st, idx) => {
+            let div = document.createElement('div');
+            div.className = 'student-tag';
+            if (st.type === 'emir') div.classList.add('tag-emir');
+            if (st.type === 'berat') div.classList.add('tag-berat');
+            if (st.type === 'kutluhan') div.classList.add('tag-kutluhan');
+            if (st.type === 'yagmur') div.classList.add('tag-yagmur');
+
+            div.innerHTML = `${st.name} <span class="btn-del" onclick="removeStudent(${idx})">×</span>`;
+            container.appendChild(div);
+
+            let x = Math.random() * w;
+            let y = Math.random() * h;
+            let dx = (Math.random() - 0.5) * 1.5;
+            let dy = (Math.random() - 0.5) * 1.5;
+
+            let obj = { el: div, x, y, dx, dy, st };
+            itemsData.push(obj);
+
+            // SÜRÜKLE BIRAK SİSTEMİ (Masaüstü & Mobil)
+            makeDraggable(div, obj);
         });
     }
 
-    // Öğrenci Ekle
-    function addStudent() {
-        const input = document.getElementById("studentInput");
-        if (input.value.trim() !== "") {
-            students.push(input.value.trim());
-            input.value = "";
-            renderList();
+    function animate() {
+        if (!isDragging) {
+            const w = window.innerWidth - 120;
+            const h = window.innerHeight - 40;
+
+            itemsData.forEach(item => {
+                if (!item.isBeingDragged) {
+                    item.x += item.dx;
+                    item.y += item.dy;
+
+                    if (item.x <= 0 || item.x >= w) item.dx *= -1;
+                    if (item.y <= 0 || item.y >= h) item.dy *= -1;
+
+                    item.el.style.left = item.x + 'px';
+                    item.el.style.top = item.y + 'px';
+                }
+            });
         }
+        animId = requestAnimationFrame(animate);
     }
 
-    // Öğrenci Sil
-    function removeStudent(index) {
-        students.splice(index, 1);
-        renderList();
-    }
+    function makeDraggable(el, obj) {
+        let active = false, currentX, currentY, initialX, initialY;
 
-    // Oyunu Başlat ve Takımları Kur
-    function startGame() {
-        if(students.length < 4) {
-            alert("En az 4 öğrenci olmalıdır!");
-            return;
-        }
-
-        // Listeyi Karıştır
-        let shuffled = [...students].sort(() => 0.5 - Math.random());
-        let teams = [[], [], [], []];
-
-        // 4 Takıma Dağıt
-        shuffled.forEach((student, index) => {
-            teams[index % 4].push(student);
-        });
-
-        // Takımları Göster
-        const teamsEl = document.getElementById("teamsContainer");
-        teamsEl.innerHTML = "";
-        teams.forEach((team, i) => {
-            let listHtml = team.map(s => `<li>${s}</li>`).join("");
-            teamsEl.innerHTML += `
-                <div class="team-card">
-                    <h3>${i + 1}. Takım</h3>
-                    <ul>${listHtml}</ul>
-                </div>
-            `;
-        });
-
-        // Oyun Alanını Aç
-        document.getElementById("gameArea").style.display = "block";
-        currentWordIndex = 0;
-        score = 0;
-        showNextWord();
-    }
-
-    function showNextWord() {
-        if (currentWordIndex < words.length) {
-            document.getElementById("currentWord").innerText = words[currentWordIndex].word;
-            document.getElementById("scoreBoard").innerText = "Puan: " + score;
-        } else {
-            document.getElementById("currentWord").innerText = "🎉 Bütün Kelimeler Tamamlandı!";
-            document.getElementById("scoreBoard").innerText = "Toplam Puanınız: " + score;
-        }
-    }
-
-    function checkAnswer(selectedType) {
-        if (currentWordIndex < words.length) {
-            if (words[currentWordIndex].type === selectedType) {
-                score += 10;
-                alert("Doğru Cevap! (+10 Puan)");
+        function dragStart(e) {
+            active = true;
+            obj.isBeingDragged = true;
+            if (e.type === "touchstart") {
+                initialX = e.touches[0].clientX - obj.x;
+                initialY = e.touches[0].clientY - obj.y;
             } else {
-                alert("Yanlış Cevap!");
+                initialX = e.clientX - obj.x;
+                initialY = e.clientY - obj.y;
             }
-            currentWordIndex++;
-            showNextWord();
+            if (obj.st.type === 'kutluhan') playKutuSound();
         }
-    }
 
-    // Sayfa Yüklenince Listeyi Göster
-    renderList();
-</script>
+        function dragEnd() {
+            active = false;
+            obj.isBeingDragged = false;
+        }
 
-</body>
-</html>
+        function drag(e) {
+            if (active) {
+                e.preventDefault();
+                if (e.type === "touchmove") {
+                    currentX = e.touches[0].clientX - initialX;
+                    currentY = e.touches[0].clientY - initialY;
+                } else {
+                    İşte tam kafandaki senaryoya göre hazırladığım, tüm özel efektleri, sürükle-bırak fiziğini, dönerek merkeze çekilme ve **ışık/yıldız patlaması (Flash Explosion)** animasyonunu barındıran tek parçalık **`index.html`** kodu!
+
+Bu kodu GitHub'a doğrudan kopyalayıp yüklediğinde siten anında hazır ve canlı olacak.
+
+```html
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10. Sınıf Coğrafya - Doğal ve Beşeri Unsurlar Yarışması</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #ffffff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            color: #000;
+            user-select: none;
+        }
+
+        /* YÜZEN İSİMLER ALANI */
+        #floating-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10;
+        }
+
+        .floating-name {
+            position: absolute;
+            font-size: 14px;
+            font-weight: bold;
+            background: #ffffff;
+            border: 2px solid #000;
+            padding: 8px 14px;
+            border-radius: 20px;
+            white-space: nowrap;
+            cursor: grab;
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.05s linear;
+        }
+
+        .floating-name:active
+        
