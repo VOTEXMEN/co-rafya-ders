@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10. Sınıf Doğal ve Beşeri Unsurlar Yarışması</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #27ae60;
+            --accent: #e67e22;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: var(--primary);
+        }
+        .student-management {
+            margin-bottom: 30px;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .add-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .btn-add { background: var(--secondary); color: white; }
+        .btn-start { background: var(--accent); color: white; width: 100%; font-size: 18px; padding: 15px; margin-top: 10px; }
+        .btn-delete { background: var(--danger); color: white; padding: 5px 10px; font-size: 12px; }
+        button:hover { opacity: 0.9; }
+        
+        .student-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        .student-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+        
+        .teams-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .team-card {
+            background: #eef2f3;
+            border-top: 5px solid var(--primary);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .team-card h3 { margin-top: 0; color: var(--primary); }
+        .team-card ul { padding-left: 20px; margin-bottom: 0; }
+        
+        .game-area {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #e8f8f5;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .word-box {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: var(--primary);
+        }
+        .choice-btns { display: flex; justify-content: center; gap: 20px; }
+        .btn-natural { background: #27ae60; color: white; font-size: 16px; }
+        .btn-human { background: #d35400; color: white; font-size: 16px; }
+        .score { font-size: 18px; font-weight: bold; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🌍 10. Sınıf Coğrafya Yarışması</h1>
+    <h2>Doğal ve Beşeri Unsurlar</h2>
+
+    <!-- Öğrenci Listesi Yönetimi -->
+    <div class="student-management">
+        <h3>Sınıf Listesi Yönetimi</h3>
+        <div class="add-box">
+            <input type="text" id="studentInput" placeholder="Öğrenci Adı Soyadı...">
+            <button class="btn-add" onclick="addStudent()">Ekle</button>
+        </div>
+        <div class="student-list" id="studentList"></div>
+        <button class="btn-start" onclick="startGame()">OYUNU BAŞLAT VE TAKIMLARI KUR 🚀</button>
+    </div>
+
+    <!-- Takımlar -->
+    <div class="teams-container" id="teamsContainer"></div>
+
+    <!-- Oyun Alanı -->
+    <div class="game-area" id="gameArea">
+        <h2>Sıra Sizde! Unsuru Tahmin Edin</h2>
+        <div class="word-box" id="currentWord">---</div>
+        <div class="choice-btns">
+            <button class="btn-natural" onclick="checkAnswer('doğal')">DOĞAL UNSUR</button>
+            <button class="btn-human" onclick="checkAnswer('beşeri')">BEŞERİ UNSUR</button>
+        </div>
+        <div class="score" id="scoreBoard">Puan: 0</div>
+    </div>
+</div>
+
+<script>
+    // Başlangıç Listesi
+    let students = [
+        "BİLAL BERAT GÖRGİN", "BÜŞRA EGER", "DENİZ ÖZTEKİN", "EBUBEKİR KİPİCİ",
+        "ECE DOĞAN", "ECRİN ÖZDEMİR", "EMİR ÖZTEN", "EMİRHAN AKÇİÇEK",
+        "EYLÜL SARI", "HALİL İBRAHİM OK", "KIVANÇ ÖZER", "KORAY CAN",
+        "KUTLUHAN KUŞCU", "MEHMET BARAN ÇEVİK", "MENESA ACUN", "MUSTAFA AŞIK",
+        "MUSTAFA BAŞOL", "NEHİR MAK", "NURSULTAN S. EMILBEKOV", "OSMAN HAKAN KUŞ",
+        "OYA YAĞMUR KARACA", "ÖZGÜR GÜNDÜZ", "ÖZLEM SU DEPREM", "SAMET BİLGEN",
+        "YAĞMUR KURUMEYDAN", "YAĞMUR UÇAR"
+    ];
+
+    const words = [
+        { word: "Orman", type: "doğal" },
+        { word: "Ev / Bina", type: "beşeri" },
+        { word: "Deprem", type: "doğal" },
+        { word: "Sanayi Tesisi", type: "beşeri" },
+        { word: "Akarsu / Su", type: "doğal" },
+        { word: "Köprü / Baraj", type: "beşeri" },
+        { word: "Dağ", type: "doğal" },
+        { word: "Otoyol", type: "beşeri" }
+    ];
+
+    let currentWordIndex = 0;
+    let score = 0;
+
+    // Listeyi Ekrana Bas
+    function renderList() {
+        const listEl = document.getElementById("studentList");
+        listEl.innerHTML = "";
+        students.forEach((name, index) => {
+            listEl.innerHTML += `
+                <div class="student-item">
+                    <span>${name}</span>
+                    <button class="btn-delete" onclick="removeStudent(${index})">Sil</button>
+                </div>
+            `;
+        });
+    }
+
+    // Öğrenci Ekle
+    function addStudent() {
+        const input = document.getElementById("studentInput");
+        if (input.value.trim() !== "") {
+            students.push(input.value.trim());
+            input.value = "";
+            renderList();
+        }
+    }
+
+    // Öğrenci Sil
+    function removeStudent(index) {
+        students.splice(index, 1);
+        renderList();
+    }
+
+    // Oyunu Başlat ve Takımları Kur
+    function startGame() {
+        if(students.length < 4) {
+            alert("En az 4 öğrenci olmalıdır!");
+            return;
+        }
+
+        // Listeyi Karıştır
+        let shuffled = [...students].sort(() => 0.5 - Math.random());
+        let teams = [[], [], [], []];
+
+        // 4 Takıma Dağıt
+        shuffled.forEach((student, index) => {
+            teams[index % 4].push(student);
+        });
+
+        // Takımları Göster
+        const teamsEl = document.getElementById("teamsContainer");
+        teamsEl.innerHTML = "";
+        teams.forEach((team, i) => {
+            let listHtml = team.map(s => `<li>${s}</li>`).join("");
+            teamsEl.innerHTML += `
+                <div class="team-card">
+                    <h3>${i + 1}. Takım</h3>
+                    <ul>${listHtml}</ul>
+                </div>
+            `;
+        });
+
+        // Oyun Alanını Aç
+        document.getElementById("gameArea").style.display = "block";
+        currentWordIndex = 0;
+        score = 0;
+        showNextWord();
+    }
+
+    function showNextWord() {
+        if (currentWordIndex < words.length) {
+            document.getElementById("currentWord").innerText = words[currentWordIndex].word;
+            document.getElementById("scoreBoard").innerText = "Puan: " + score;
+        } else {
+            document.getElementById("currentWord").innerText = "🎉 Bütün Kelimeler Tamamlandı!";
+            document.getElementById("scoreBoard").innerText = "Toplam Puanınız: " + score;
+        }
+    }
+
+    function checkAnswer(selectedType) {
+        if (currentWordIndex < words.length) {
+            if (words[currentWordIndex].type === selectedType) {
+                score += 10;
+                alert("Doğru Cevap! (+10 Puan)");
+            } else {
+                alert("Yanlış Cevap!");
+            }
+            currentWordIndex++;
+            showNextWord();
+        }
+    }
+
+    // Sayfa Yüklenince Listeyi Göster
+    renderList();
+</script>
+
+</body>
+</html>
